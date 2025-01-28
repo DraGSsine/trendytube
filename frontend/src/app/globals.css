@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%; /* Matches the dark bg-[#0a0a0a] */
+    --foreground: 0 0% 98%; /* White text color */
+    --card: 240 10% 3.9%; /* Same as background */
+    --card-foreground: 0 0% 98%; /* White text color */
+    --popover: 240 10% 3.9%; /* Same as background */
+    --popover-foreground: 0 0% 98%; /* White text color */
+    --primary: 0 91.2% 59.8%; /* Red primary color */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --secondary: 240 3.7% 15.9%; /* Matches the zinc-800 background */
+    --secondary-foreground: 0 0% 98%; /* White text */
+    --muted: 240 3.7% 15.9%; /* Same as secondary */
+    --muted-foreground: 240 5% 64.9%; /* Zinc-400 text color */
+    --accent: 240 3.7% 15.9%; /* Same as secondary */
+    --accent-foreground: 0 0% 98%; /* White text */
+    --destructive: 0 62.8% 30.6%; /* Destructive color (unchanged) */
+    --destructive-foreground: 0 0% 98%; /* White text on destructive */
+    --border: 240 3.7% 15.9%; /* Matches zinc-800 border */
+    --input: 240 3.7% 15.9%; /* Matches input background */
+    --ring: 0 91.2% 59.8%; /* Red ring color */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
