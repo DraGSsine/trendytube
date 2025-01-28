@@ -175,7 +175,7 @@ export default function Home() {
         throw new Error(d.error || "Failed to generate ideas");
       }
 
-      const response = await fetch("http://localhost:8000/process", {
+      const response = await fetch("https://3b1fad95-03a4-49d9-99a3-20e56f66bce0.us-east-1.cloud.genez.io/process", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
