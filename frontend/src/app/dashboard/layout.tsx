@@ -1,7 +1,7 @@
+import ModalProvider from "@/components/dashboard/ModalProvider";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { SubscriptionModal } from "@/components/dashboard/SubscriptionModal";
 import { authOptions } from "@/lib/auth/authOptions";
-import { checkSubscription } from "@/lib/checkSubscription";
 import { connectDB } from "@/lib/mongodb";
 import { User } from "@/models/user";
 import { getServerSession } from "next-auth";
@@ -11,7 +11,6 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const hasSubscription = await checkSubscription();
   await connectDB();
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -36,7 +35,7 @@ export default async function DashboardLayout({
     <div className="flex">
       <Sidebar plan={plan} used={used} max={max} />
       <main className=" flex-grow">{children}</main>
-      <SubscriptionModal isOpen={!hasSubscription} />
+      <ModalProvider />
     </div>
   );
 }

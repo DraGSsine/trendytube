@@ -1,3 +1,4 @@
+"use server"
 import { getServerSession } from "next-auth/next";
 import { User } from "@/models/user";
 import { connectDB } from "./mongodb";
