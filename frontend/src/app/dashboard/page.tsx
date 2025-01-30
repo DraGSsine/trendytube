@@ -41,14 +41,14 @@ type VideoIdea = {
 };
 
 const timeRanges = [
-  { label: "Past 24 hours", value: "24" },
-  { label: "Past 2 days", value: "48" },
-  { label: "Past 3 days", value: "72" },
   { label: "Past 7 days", value: "168" },
+  { label: "Past 3 days", value: "72" },
+  { label: "Past 2 days", value: "48" },
+  { label: "Past 24 hours", value: "24" },
 ];
 
 const youtubeCategories = [
-  "All categories",
+  "Sports",
   "Autos and Vehicles",
   "Beauty and Fashion",
   "Business and Finance",
@@ -60,14 +60,14 @@ const youtubeCategories = [
   "Hobbies and Leisure",
   "Jobs and Education",
   "Law and Government",
-  "Other",
   "Pets and Animals",
   "Politics",
   "Science",
   "Shopping",
-  "Sports",
   "Technology",
   "Travel and Transportation",
+  "All categories",
+  "Other",
 ];
 
 function LoadingStep({ icon: Icon, text, progress, isActive, isPulsing = false }: {
@@ -104,8 +104,8 @@ function LoadingStep({ icon: Icon, text, progress, isActive, isPulsing = false }
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [channelDescription, setChannelDescription] = useState("");
-  const [timeRange, setTimeRange] = useState("24");
-  const [category, setCategory] = useState("All categories");
+  const [timeRange, setTimeRange] = useState("168");
+  const [category, setCategory] = useState("Sports");
   const [ideas, setIdeas] = useState<VideoIdea[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoIdea | null>(null);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -174,9 +174,12 @@ export default function Home() {
       if (!res.ok) {
         throw new Error(d.error || "Failed to generate ideas");
       }
-
-      const response = await fetch("https://3b1fad95-03a4-49d9-99a3-20e56f66bce0.us-east-1.cloud.genez.io/process", {
+      const prourl = 'https://3b1fad95-03a4-49d9-99a3-20e56f66bce0.us-east-1.cloud.genez.io/process'
+      const response = await fetch("http://localhost:8000/process", {
         method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           channelDescription,
           timeRange,

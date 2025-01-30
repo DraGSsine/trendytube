@@ -5,7 +5,7 @@ import siteConfig  from "@/config/site";
 
 const Hero = () => {
   return (
-    <section className="flex flex-col items-center px-4 animate-section text-white bg-[#0a0a0a]">
+    <section className="flex flex-col items-center px-4 animate-section text-white">
       <div className="w-full flex flex-col items-center pb-10">
         <h1 className="text-5xl md:text-7xl font-bold text-center">
           <span className="animate-gradient bg-gradient-to-r from-red-600 via-[#9837d3] to-red-600 bg-[length:200%_auto] bg-clip-text text-transparent block py-2">
