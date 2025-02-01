@@ -1,21 +1,27 @@
-import express from 'express';
+import express from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
-import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
-import cors from 'cors';
+import bodyParser from "body-parser";
+import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const port = 8000;
 
-app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://trendytube.vercel.app', 'https://trendytube.pro'],
-  methods: 'GET,POST',
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://trendytube.vercel.app",
+      "https://trendytube.pro",
+    ],
+    methods: "GET,POST",
+  })
+);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -50,11 +56,11 @@ async function fetchTrendingTopics(timeRange) {
   }
 
   console.log("Fetching new trends...");
-  
+
   try {
     const url = `https://serpapi.com/search.json?engine=google_trends_trending_now&hours=${timeRange}&api_key=${process.env.SERPER_API_KEY}`;
     console.log("URL:", url);
-    
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -96,16 +102,16 @@ async function fetchTrendingTopics(timeRange) {
 }
 
 async function cleanJsonResponse(text) {
-  text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+  text = text.replace(/```json\n?/g, "").replace(/```\n?/g, "");
   text = text.trim();
-  
-  if (!text.startsWith('[')) {
-    text = '[' + text;
+
+  if (!text.startsWith("[")) {
+    text = "[" + text;
   }
-  if (!text.endsWith(']')) {
-    text = text + ']';
+  if (!text.endsWith("]")) {
+    text = text + "]";
   }
-  
+
   try {
     return JSON.parse(text);
   } catch (error) {
@@ -119,11 +125,15 @@ async function generateInitialScripts(channelDescription, trends) {
 You are a video content expert with access to real-time knowledge of current events and breaking news. Create scripts that combine trending topics and latest news that align with: "${channelDescription}".
 
 First, analyze these trending topics:
-${trends.map(t => `
+${trends
+  .map(
+    (t) => `
 - ${t.title} (Rank #${t.top})
-  Categories: ${t.categories.join(', ')}
-  Related: ${t.relatedQueries.join(', ')}
-`).join('\n')}
+  Categories: ${t.categories.join(", ")}
+  Related: ${t.relatedQueries.join(", ")}
+`
+  )
+  .join("\n")}
 
 Then, check if there are any MAJOR BREAKING NEWS stories from the last 24 hours related to these topics or the channel's focus. If there are significant breaking news stories, prioritize them and include detailed, accurate information about the events.
 
@@ -158,8 +168,8 @@ Requirements:
   try {
     const result = await model.generateContent(prompt);
     const content = result.response.text();
-    console.log("Raw AI response:", content.substring(0, 200) + "..."); 
-    
+    console.log("Raw AI response:", content.substring(0, 200) + "...");
+
     return await cleanJsonResponse(content);
   } catch (error) {
     console.error("Error in generateInitialScripts:", error);
@@ -167,7 +177,12 @@ Requirements:
   }
 }
 
-async function optimizeTitleAndDescription(script, trend, channelDescription, isBreakingNews = false) {
+async function optimizeTitleAndDescription(
+  script,
+  trend,
+  channelDescription,
+  isBreakingNews = false
+) {
   const prompt = `
 You are a YouTube SEO expert. Create optimized metadata for this video.
 
@@ -182,7 +197,7 @@ IMPORTANT: Respond ONLY with a JSON object. No other text. Use this EXACT format
 
 Content Details:
 - Channel Focus: ${channelDescription}
-- Content Type: ${isBreakingNews ? 'BREAKING NEWS' : 'Trend'}
+- Content Type: ${isBreakingNews ? "BREAKING NEWS" : "Trend"}
 - Topic: ${trend.title}
 - Script Summary: ${script.substring(0, 300)}...
 
@@ -196,30 +211,56 @@ Requirements:
   try {
     const result = await model.generateContent(prompt);
     const content = result.response.text();
-    return JSON.parse(content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
+    return JSON.parse(
+      content
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim()
+    );
   } catch (error) {
     console.error("Error in optimizeTitleAndDescription:", error);
-    throw new Error("Failed to optimize title and description: " + error.message);
+    throw new Error(
+      "Failed to optimize title and description: " + error.message
+    );
   }
 }
 
 async function generateFinalContent(category, channelDescription, timeRange) {
   try {
+    console.log("Generating content for category:", category);
     const trends = await fetchTrendingTopics(timeRange);
-    let relevantTrends = category === "All categories" 
-      ? trends.slice(0, 5)
-      : trends.filter(t => t.categories.some(cat => 
-          cat.toLowerCase() === category.toLowerCase()
-        )).slice(0, 5);
+    trends.forEach((element) => {
+      element.categories.forEach((cat) => {
+        if (category.toLowerCase() == cat.toLowerCase()) {
+          console.log("Category found: ", cat);
+        }
+      });
+    });
+    let relevantTrends =
+      category === "All categories"
+        ? trends.slice(0, 5)
+        : trends
+            .filter((t) =>
+              t.categories.some(
+                (cat) => cat.toLowerCase() === category.toLowerCase()
+              )
+            )
+            .slice(0, 5);
 
     if (relevantTrends.length === 0) {
       throw new Error("No relevant trending topics found");
     }
 
-    console.log("Generating scripts for trends:", relevantTrends.map(t => t.title));
+    console.log(
+      "Generating scripts for trends:",
+      relevantTrends.map((t) => t.title)
+    );
 
-    const initialScripts = await generateInitialScripts(channelDescription, relevantTrends);
-    
+    const initialScripts = await generateInitialScripts(
+      channelDescription,
+      relevantTrends
+    );
+
     if (!Array.isArray(initialScripts)) {
       throw new Error("Invalid response format from script generation");
     }
@@ -240,17 +281,21 @@ async function generateFinalContent(category, channelDescription, timeRange) {
             description: optimization.description,
             fullScript: content.script,
             hashtags: optimization.hashtags,
-            engagementScore: Math.round((content.initialEngagement + optimization.predictedCTR) / 2),
+            engagementScore: Math.round(
+              (content.initialEngagement + optimization.predictedCTR) / 2
+            ),
             trendingContext: {
               suggestedCategories: relevantTrends[index].categories,
-              channelFit: content.channelFitExplanation
-            }
+              channelFit: content.channelFitExplanation,
+            },
           };
 
           return VideoContentSchema.parse(finalVideoContent);
         } catch (error) {
           console.error(`Error processing content ${index}:`, error);
-          throw new Error(`Failed to process content for trend "${relevantTrends[index].title}"`);
+          throw new Error(
+            `Failed to process content for trend "${relevantTrends[index].title}"`
+          );
         }
       })
     );
@@ -258,14 +303,14 @@ async function generateFinalContent(category, channelDescription, timeRange) {
     return {
       success: true,
       error: null,
-      data: finalContent
+      data: finalContent,
     };
   } catch (error) {
     console.error("Content Generation Error:", error);
     return {
       success: false,
       error: error.message || "Internal server error",
-      data: null
+      data: null,
     };
   }
 }
@@ -287,11 +332,7 @@ async function processUserData(data) {
       timeRange
     );
 
-    return {
-      success: true,
-      data: responseText,
-      error: null,
-    };
+    return responseText;
   } catch (error) {
     console.error("API Error:", error);
     return {
@@ -302,10 +343,9 @@ async function processUserData(data) {
   }
 }
 
-app.post('/process', async (req, res) => {
+app.post("/process", async (req, res) => {
   try {
     const data = req.body;
-    console.log("Request Data:", data);
     const response = await processUserData(data);
     res.json(response);
   } catch (error) {
