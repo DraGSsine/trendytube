@@ -9,8 +9,6 @@ export async function checkSubscription() {
     const session = await getServerSession();
     
     const user = await User.findOne({ email: session?.user?.email });
-
-    console.log("User subscription status:", user?.subscriptionStatus);
     if (user?.subscriptionStatus !== "active" && user?.subscriptionStatus !== "trial") {
       return false;
     }

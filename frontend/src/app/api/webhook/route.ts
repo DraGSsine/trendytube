@@ -95,7 +95,6 @@ async function updateUserAfterCheckout(
   session: Stripe.Checkout.Session,
   email: string
 ): Promise<void> {
-  console.log(session.metadata?.plan);
   await User.findOneAndUpdate(
     { email },
     {

@@ -55,11 +55,8 @@ async function fetchTrendingTopics(timeRange) {
     return globalTrendCache.trends;
   }
 
-  console.log("Fetching new trends...");
-
   try {
     const url = `https://serpapi.com/search.json?engine=google_trends_trending_now&hours=${timeRange}&api_key=${process.env.SERPER_API_KEY}`;
-    console.log("URL:", url);
 
     const response = await fetch(url, {
       method: "GET",
@@ -168,8 +165,6 @@ Requirements:
   try {
     const result = await model.generateContent(prompt);
     const content = result.response.text();
-    console.log("Raw AI response:", content.substring(0, 200) + "...");
-
     return await cleanJsonResponse(content);
   } catch (error) {
     console.error("Error in generateInitialScripts:", error);
@@ -227,15 +222,7 @@ Requirements:
 
 async function generateFinalContent(category, channelDescription, timeRange) {
   try {
-    console.log("Generating content for category:", category);
     const trends = await fetchTrendingTopics(timeRange);
-    trends.forEach((element) => {
-      element.categories.forEach((cat) => {
-        if (category.toLowerCase() == cat.toLowerCase()) {
-          console.log("Category found: ", cat);
-        }
-      });
-    });
     let relevantTrends =
       category === "All categories"
         ? trends.slice(0, 5)
@@ -250,12 +237,6 @@ async function generateFinalContent(category, channelDescription, timeRange) {
     if (relevantTrends.length === 0) {
       throw new Error("No relevant trending topics found");
     }
-
-    console.log(
-      "Generating scripts for trends:",
-      relevantTrends.map((t) => t.title)
-    );
-
     const initialScripts = await generateInitialScripts(
       channelDescription,
       relevantTrends
@@ -264,8 +245,6 @@ async function generateFinalContent(category, channelDescription, timeRange) {
     if (!Array.isArray(initialScripts)) {
       throw new Error("Invalid response format from script generation");
     }
-
-    console.log("Scripts generated successfully, proceeding with optimization");
 
     const finalContent = await Promise.all(
       initialScripts.map(async (content, index) => {

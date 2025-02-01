@@ -100,9 +100,7 @@ export default function App() {
           variant: "destructive",
         });
       }
-      const mockIdeas = await result.json();
-      console.log(mockIdeas.data);
-      
+      const mockIdeas = await result.json();      
       setIdeas(mockIdeas);
     } catch (error) {
       toast({
